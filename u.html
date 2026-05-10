@@ -6346,6 +6346,42 @@ html, body { overscroll-behavior-y: none; }
         </div>
     </div>
 
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyBYZ1gAxMfLinFQMDvGraDy96ft9_I5aPQ",
+  authDomain: "infernix-esports.firebaseapp.com",
+  projectId: "infernix-esports",
+  storageBucket: "infernix-esports.firebasestorage.app",
+  messagingSenderId: "769631336074",
+  appId: "1:769631336074:web:18831357cc7dd200931f73"
+});
+
+const auth = getAuth(app);
+const db = getDatabase(app);
+const messaging = getMessaging(app);
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+  try {
+    const sw = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const token = await getToken(messaging, {
+      vapidKey: "BOuImU80SzOOACK9E6gVbcFsT3QCyPT4m3pK97mn1p_2XJ54bgAma7Fj3C2uVm2SmlitFwuMjID5tRXdZjnsw",
+      serviceWorkerRegistration: sw
+    });
+    if (token) {
+      await set(ref(db, `users/${user.uid}/fcmToken`), token);
+      console.log('FCM Token saved!');
+    }
+  } catch(e) {
+    console.log('FCM Error:', e);
+  }
+});
+</script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
