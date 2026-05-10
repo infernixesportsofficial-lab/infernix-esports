@@ -7864,6 +7864,59 @@
         </div>
     </div>
 
+<!-- PUSH NOTIFICATION SECTION -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyBYZ1gAxMfLinFQMDvGraDy96ft9_I5aPQ",
+  authDomain: "infernix-esports.firebaseapp.com",
+  projectId: "infernix-esports",
+  messagingSenderId: "769631336074",
+  appId: "1:769631336074:web:18831357cc7dd200931f73"
+});
+
+const db = getDatabase(app);
+
+window.sendPushToAll = async function() {
+  const title = document.getElementById('notifTitle').value.trim();
+  const body = document.getElementById('notifBody').value.trim();
+  
+  if (!title || !body) {
+    alert('Title aur Message dono likho!');
+    return;
+  }
+
+  try {
+    const btn = document.getElementById('sendNotifBtn');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Sending...';
+
+    const usersSnap = await get(ref(db, 'users'));
+    const tokens = [];
+    
+    usersSnap.forEach(u => {
+      const token = u.val().fcmToken;
+      if (token) tokens.push(token);
+    });
+
+    const response = await fetch('https://fcm.googleapis.com/v1/projects/infernix-esports/messages:send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, body, tokens })
+    });
+
+    alert(`✅ ${tokens.length} users ko notification bheja!`);
+    document.getElementById('notifTitle').value = '';
+    document.getElementById('notifBody').value = '';
+    btn.disabled = false;
+    btn.innerHTML = '🔔 Send Notification';
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+};
+</script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
